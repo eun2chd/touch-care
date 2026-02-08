@@ -109,10 +109,18 @@ export const DeviceScreen: React.FC<DeviceScreenProps> = ({ navigation }) => {
                 <View style={styles.deviceInfo}>
                   <Text style={styles.deviceName}>기기명 : {device.name}</Text>
                   <Text style={styles.deviceMac}>MAC : {device.macAddress}</Text>
-                  <View style={[styles.statusBadge, { backgroundColor: device.isConnected ? Colors.success : Colors.textLight }]}>
-                    <Text style={styles.statusText}>
-                      {device.isConnected ? '연결됨' : '연결 안 됨'}
-                    </Text>
+                  <View style={styles.statusRow}>
+                    <View style={[styles.statusBadge, { backgroundColor: device.isConnected ? Colors.success : Colors.textLight }]}>
+                      <Text style={styles.statusText}>
+                        {device.isConnected ? '연결됨' : '연결 안 됨'}
+                      </Text>
+                    </View>
+                    {device.isConnected && (
+                      <View style={styles.batteryContainer}>
+                        <MaterialIcons name="battery-full" size={16} color={Colors.success} />
+                        <Text style={styles.batteryText}>92%</Text>
+                      </View>
+                    )}
                   </View>
                 </View>
               </View>
@@ -250,6 +258,12 @@ const styles = StyleSheet.create({
     color: Colors.textLight,
     marginBottom: 8,
   },
+  statusRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginTop: 4,
+  },
   statusBadge: {
     alignSelf: 'flex-start',
     paddingHorizontal: 12,
@@ -259,6 +273,21 @@ const styles = StyleSheet.create({
   statusText: {
     ...Typography.text.caption,
     color: '#fff',
+    fontSize: 11,
+    fontWeight: '600',
+  },
+  batteryContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+    backgroundColor: Colors.iceBlue,
+  },
+  batteryText: {
+    ...Typography.text.caption,
+    color: Colors.text,
     fontSize: 11,
     fontWeight: '600',
   },
