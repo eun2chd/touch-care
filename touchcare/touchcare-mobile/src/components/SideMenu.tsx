@@ -48,6 +48,12 @@ const menuItems: MenuItem[] = [
     screen: 'Report',
   },
   {
+    key: 'log',
+    label: '로그',
+    icon: 'list',
+    screen: 'Log',
+  },
+  {
     key: 'mypage',
     label: '마이페이지',
     icon: 'person-outline',

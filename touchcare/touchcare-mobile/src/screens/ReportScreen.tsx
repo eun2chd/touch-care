@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 // @ts-ignore - @expo/vector-icons 타입 정의
 import { MaterialIcons } from '@expo/vector-icons';
@@ -12,10 +12,31 @@ interface ReportScreenProps {
   navigation: any;
 }
 
+type PeriodType = 'week' | 'month';
+
 /**
  * 리포트 화면
  */
 export const ReportScreen: React.FC<ReportScreenProps> = ({ navigation }) => {
+  const [periodType, setPeriodType] = useState<PeriodType>('week');
+
+  // 기간별 필터링된 기록
+  const filteredRecords = useMemo(() => {
+    const today = new Date();
+    const cutoffDate = new Date(today);
+    
+    if (periodType === 'week') {
+      // 최근 7일
+      cutoffDate.setDate(cutoffDate.getDate() - 7);
+    } else {
+      // 최근 30일 (월간)
+      cutoffDate.setDate(cutoffDate.getDate() - 30);
+    }
+    
+    const cutoffDateStr = cutoffDate.toISOString().split('T')[0];
+    return MOCK_RECORDS.filter((record) => record.date >= cutoffDateStr);
+  }, [periodType]);
+
   // 시간대별 분포 계산
   const timeDistribution = useMemo(() => {
     const distribution = {
@@ -24,7 +45,7 @@ export const ReportScreen: React.FC<ReportScreenProps> = ({ navigation }) => {
       evening: 0, // 18:00 - 24:00
     };
 
-    MOCK_RECORDS.forEach((record) => {
+    filteredRecords.forEach((record) => {
       const [hours] = record.time.split(':').map(Number);
       if (hours >= 6 && hours < 12) {
         distribution.morning++;
@@ -46,32 +67,57 @@ export const ReportScreen: React.FC<ReportScreenProps> = ({ navigation }) => {
         evening: distribution.evening,
       },
     };
-  }, []);
+  }, [filteredRecords]);
 
-  // 주간 변화 패턴 계산 (최근 7일)
-  const weeklyPattern = useMemo(() => {
+  // 기간별 변화 패턴 계산
+  const periodPattern = useMemo(() => {
     const today = new Date();
-    const days = [];
-    for (let i = 6; i >= 0; i--) {
-      const date = new Date(today);
-      date.setDate(date.getDate() - i);
-      const dateStr = date.toISOString().split('T')[0];
-      const count = MOCK_RECORDS.filter((r) => r.date === dateStr).length;
-      days.push({
-        date: dateStr,
-        dayName: ['일', '월', '화', '수', '목', '금', '토'][date.getDay()],
-        count,
-      });
+    const items = [];
+    
+    if (periodType === 'week') {
+      // 주간: 최근 7일
+      for (let i = 6; i >= 0; i--) {
+        const date = new Date(today);
+        date.setDate(date.getDate() - i);
+        const dateStr = date.toISOString().split('T')[0];
+        const count = filteredRecords.filter((r) => r.date === dateStr).length;
+        items.push({
+          date: dateStr,
+          label: ['일', '월', '화', '수', '목', '금', '토'][date.getDay()],
+          count,
+        });
+      }
+    } else {
+      // 월간: 최근 30일을 주 단위로 그룹화 (4주)
+      const weeks = [];
+      for (let i = 3; i >= 0; i--) {
+        const weekStart = new Date(today);
+        weekStart.setDate(weekStart.getDate() - (i * 7) - 6);
+        const weekEnd = new Date(weekStart);
+        weekEnd.setDate(weekEnd.getDate() + 6);
+        
+        const weekStartStr = weekStart.toISOString().split('T')[0];
+        const weekEndStr = weekEnd.toISOString().split('T')[0];
+        
+        const count = filteredRecords.filter((r) => r.date >= weekStartStr && r.date <= weekEndStr).length;
+        items.push({
+          date: weekStartStr,
+          label: `${weekStart.getMonth() + 1}/${weekStart.getDate()}`,
+          count,
+        });
+      }
     }
-    return days;
-  }, []);
+    
+    return items;
+  }, [periodType, filteredRecords]);
 
-  const maxWeeklyCount = Math.max(...weeklyPattern.map((d) => d.count), 1);
+  const maxPeriodCount = Math.max(...periodPattern.map((d) => d.count), 1);
 
   // AI 분석 리포트 생성
   const aiAnalysis = useMemo(() => {
-    const totalRecords = MOCK_RECORDS.length;
-    const avgPerDay = totalRecords / 30; // 대략적인 일평균
+    const totalRecords = filteredRecords.length;
+    const days = periodType === 'week' ? 7 : 30;
+    const avgPerDay = totalRecords / days;
     const mostActiveTime = 
       timeDistribution.counts.morning > timeDistribution.counts.afternoon &&
       timeDistribution.counts.morning > timeDistribution.counts.evening
@@ -80,13 +126,33 @@ export const ReportScreen: React.FC<ReportScreenProps> = ({ navigation }) => {
         ? '오후'
         : '저녁';
 
+    // 트렌드 계산: 최근 기간과 이전 기간 비교
+    const today = new Date();
+    const currentPeriodStart = new Date(today);
+    currentPeriodStart.setDate(currentPeriodStart.getDate() - days);
+    const previousPeriodStart = new Date(currentPeriodStart);
+    previousPeriodStart.setDate(previousPeriodStart.getDate() - days);
+    
+    const currentPeriodCount = filteredRecords.length;
+    const previousPeriodCount = MOCK_RECORDS.filter((r) => {
+      const recordDate = new Date(r.date);
+      return recordDate >= previousPeriodStart && recordDate < currentPeriodStart;
+    }).length;
+    
+    let trend = '관찰';
+    if (currentPeriodCount > previousPeriodCount * 1.2) {
+      trend = '증가';
+    } else if (currentPeriodCount >= previousPeriodCount * 0.8) {
+      trend = '안정';
+    }
+
     return {
       totalRecords,
       avgPerDay: avgPerDay.toFixed(1),
       mostActiveTime,
-      trend: totalRecords > 40 ? '증가' : totalRecords > 20 ? '안정' : '관찰',
+      trend,
     };
-  }, [timeDistribution]);
+  }, [filteredRecords, periodType, timeDistribution]);
 
   const renderTimeDistributionChart = () => {
     const maxHeight = 200;
@@ -167,29 +233,31 @@ export const ReportScreen: React.FC<ReportScreenProps> = ({ navigation }) => {
     );
   };
 
-  const renderWeeklyPatternChart = () => {
+  const renderPeriodPatternChart = () => {
     const maxHeight = 150;
 
     return (
       <View style={styles.chartContainer}>
-        <Text style={styles.chartTitle}>주간 변화 패턴</Text>
+        <Text style={styles.chartTitle}>
+          {periodType === 'week' ? '주간 변화 패턴' : '월간 변화 패턴'}
+        </Text>
         <View style={styles.chartWrapper}>
           <View style={styles.weeklyChartBars}>
-            {weeklyPattern.map((day, index) => (
+            {periodPattern.map((item, index) => (
               <View key={index} style={styles.weeklyChartBarGroup}>
                 <View style={styles.weeklyChartBarContainer}>
                   <View
                     style={[
                       styles.weeklyChartBar,
                       {
-                        height: (day.count / maxWeeklyCount) * maxHeight,
-                        backgroundColor: day.count > 0 ? Colors.primary : Colors.iceBlue,
+                        height: (item.count / maxPeriodCount) * maxHeight,
+                        backgroundColor: item.count > 0 ? Colors.primary : Colors.iceBlue,
                       },
                     ]}
                   />
                 </View>
-                <Text style={styles.weeklyChartLabel}>{day.dayName}</Text>
-                <Text style={styles.weeklyChartValue}>{day.count}</Text>
+                <Text style={styles.weeklyChartLabel}>{item.label}</Text>
+                <Text style={styles.weeklyChartValue}>{item.count}</Text>
               </View>
             ))}
           </View>
@@ -202,6 +270,42 @@ export const ReportScreen: React.FC<ReportScreenProps> = ({ navigation }) => {
     <Screen showBottomTab={true} currentScreen="Report" onNavigate={navigation.navigate}>
       <Header navigation={navigation} />
       <View style={styles.headerActions}>
+        <View style={styles.periodToggle}>
+          <TouchableOpacity
+            style={[
+              styles.periodButton,
+              periodType === 'week' && styles.periodButtonActive,
+            ]}
+            onPress={() => setPeriodType('week')}
+            activeOpacity={0.7}
+          >
+            <Text
+              style={[
+                styles.periodButtonText,
+                periodType === 'week' && styles.periodButtonTextActive,
+              ]}
+            >
+              주간
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[
+              styles.periodButton,
+              periodType === 'month' && styles.periodButtonActive,
+            ]}
+            onPress={() => setPeriodType('month')}
+            activeOpacity={0.7}
+          >
+            <Text
+              style={[
+                styles.periodButtonText,
+                periodType === 'month' && styles.periodButtonTextActive,
+              ]}
+            >
+              월간
+            </Text>
+          </TouchableOpacity>
+        </View>
         <TouchableOpacity style={styles.exportButton} activeOpacity={0.7}>
           <MaterialIcons name="picture-as-pdf" size={20} color={Colors.primary} />
           <Text style={styles.exportButtonText}>PDF 내보내기</Text>
@@ -251,8 +355,8 @@ export const ReportScreen: React.FC<ReportScreenProps> = ({ navigation }) => {
         {/* 시간대별 분포 차트 */}
         {renderTimeDistributionChart()}
 
-        {/* 주간 변화 패턴 차트 */}
-        {renderWeeklyPatternChart()}
+        {/* 기간별 변화 패턴 차트 */}
+        {renderPeriodPatternChart()}
       </ScrollView>
     </Screen>
   );
@@ -280,11 +384,35 @@ const styles = StyleSheet.create({
   },
   headerActions: {
     flexDirection: 'row',
-    justifyContent: 'flex-end',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     paddingHorizontal: 20,
     paddingVertical: 12,
     borderBottomWidth: 1,
     borderBottomColor: '#f0f0f0',
+  },
+  periodToggle: {
+    flexDirection: 'row',
+    backgroundColor: Colors.iceBlue,
+    borderRadius: 8,
+    padding: 4,
+    gap: 4,
+  },
+  periodButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 6,
+  },
+  periodButtonActive: {
+    backgroundColor: Colors.primary,
+  },
+  periodButtonText: {
+    ...Typography.text.body,
+    color: Colors.text,
+    fontWeight: '600',
+  },
+  periodButtonTextActive: {
+    color: Colors.background,
   },
   exportButton: {
     flexDirection: 'row',

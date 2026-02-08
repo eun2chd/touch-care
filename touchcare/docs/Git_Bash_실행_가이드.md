@@ -27,7 +27,12 @@ npx expo install expo-font @expo-google-fonts/pretendard
 ```bash
 npm start
 ```
+폰에 Expo Go 설치했어?
 
+안드로이드면 Play스토어에서
+Expo Go 설치해야 함.
+
+설치 안 되어 있으면 QR 찍어도 안 열림.
 
 
 

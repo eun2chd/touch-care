@@ -15,12 +15,13 @@ import { DeviceDashboardScreen } from './src/screens/DeviceDashboardScreen';
 import { RecordScreen } from './src/screens/RecordScreen';
 import { ReportScreen } from './src/screens/ReportScreen';
 import { SettingsScreen } from './src/screens/SettingsScreen';
+import { LogScreen } from './src/screens/LogScreen';
 import { LoadingScreen } from './src/components/LoadingScreen';
 
 // 스플래시 스크린을 자동으로 숨기지 않도록 설정
 SplashScreen.preventAutoHideAsync();
 
-type Screen = 'Login' | 'Home' | 'Detail' | 'SignUp' | 'Device' | 'MyPage' | 'AddDevice' | 'DeviceDashboard' | 'Record' | 'Report' | 'Settings';
+type Screen = 'Login' | 'Home' | 'Detail' | 'SignUp' | 'Device' | 'MyPage' | 'AddDevice' | 'DeviceDashboard' | 'Record' | 'Report' | 'Settings' | 'Log';
 
 export default function App() {
   console.log('🚀 App.tsx 로드됨 - 로그인 화면으로 시작');
@@ -113,7 +114,7 @@ export default function App() {
       } else if (currentScreen === 'SignUp') {
         setIsTransitionLoading(true);
         setNextScreen('Login');
-      } else if (currentScreen === 'Device' || currentScreen === 'MyPage' || currentScreen === 'Record' || currentScreen === 'Report') {
+      } else if (currentScreen === 'Device' || currentScreen === 'MyPage' || currentScreen === 'Record' || currentScreen === 'Report' || currentScreen === 'Log') {
         setIsTransitionLoading(true);
         setNextScreen('Home');
       } else if (currentScreen === 'AddDevice') {
@@ -143,7 +144,7 @@ export default function App() {
   }
 
   // 하단 네비게이션 바를 표시할 화면 목록
-  const screensWithBottomTab = ['Home', 'Device', 'MyPage', 'Record', 'Report'];
+  const screensWithBottomTab = ['Home', 'Device', 'MyPage', 'Record', 'Report', 'Log'];
   const showBottomTab = screensWithBottomTab.includes(currentScreen);
 
   // 화면 렌더링
@@ -184,6 +185,9 @@ export default function App() {
       case 'Settings':
         console.log('✅ SettingsScreen 렌더링');
         return <SettingsScreen navigation={navigation} />;
+      case 'Log':
+        console.log('✅ LogScreen 렌더링');
+        return <LogScreen navigation={navigation} />;
       default:
         console.log('⚠️ 기본값: LoginScreen 렌더링');
         return <LoginScreen navigation={navigation} />;
