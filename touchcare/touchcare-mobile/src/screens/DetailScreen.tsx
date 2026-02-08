@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { Header } from '../components/Header';
+import { Screen } from '../components/Screen';
 import Colors from '../constants/colors';
 import Typography from '../constants/Typography';
 
@@ -12,11 +13,21 @@ interface DetailScreenProps {
  * 상세 화면
  */
 export const DetailScreen: React.FC<DetailScreenProps> = ({ navigation }) => {
+  const handleMenu = () => {
+    // TODO: 메뉴 열기
+    console.log('메뉴 열기');
+  };
+
+  const handleClose = () => {
+    // TODO: 종 아이콘 클릭 처리 (알림 등)
+    console.log('종 아이콘 클릭');
+  };
+
   return (
-    <View style={styles.container}>
+    <Screen>
       <Header
-        title="상세 정보"
-        onBack={() => navigation.goBack()}
+        onMenu={handleMenu}
+        onClose={handleClose}
       />
       <ScrollView style={styles.content}>
         <View style={styles.section}>
@@ -44,7 +55,7 @@ export const DetailScreen: React.FC<DetailScreenProps> = ({ navigation }) => {
           </View>
         </View>
       </ScrollView>
-    </View>
+    </Screen>
   );
 };
 

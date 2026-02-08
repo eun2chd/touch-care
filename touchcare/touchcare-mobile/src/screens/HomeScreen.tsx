@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { Header } from '../components/Header';
 import { Button } from '../components/Button';
+import { Screen } from '../components/Screen';
 import Colors from '../constants/colors';
 import Typography from '../constants/Typography';
 
@@ -13,9 +14,22 @@ interface HomeScreenProps {
  * 홈 화면
  */
 export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
+  const handleMenu = () => {
+    // TODO: 메뉴 열기 (사이드 메뉴 등)
+    console.log('메뉴 열기');
+  };
+
+  const handleClose = () => {
+    // TODO: 종 아이콘 클릭 처리 (알림 등)
+    console.log('종 아이콘 클릭');
+  };
+
   return (
-    <View style={styles.container}>
-      <Header title="홈" />
+    <Screen>
+      <Header 
+        onMenu={handleMenu}
+        onClose={handleClose}
+      />
       <ScrollView style={styles.content}>
         <View style={styles.card}>
           <Text style={styles.cardTitle}>오늘의 마음 기록</Text>
@@ -43,7 +57,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
           />
         </View>
       </ScrollView>
-    </View>
+    </Screen>
   );
 };
 

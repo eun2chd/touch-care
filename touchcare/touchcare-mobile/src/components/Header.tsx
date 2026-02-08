@@ -1,11 +1,16 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+// @ts-ignore - @expo/vector-icons 타입 정의
+import { MaterialIcons, Ionicons } from '@expo/vector-icons';
 import Colors from '../constants/colors';
 import Typography from '../constants/Typography';
+import { useUserStore } from '../store/useUserStore';
 
 interface HeaderProps {
-  title: string;
+  title?: string; // 선택사항으로 변경
   onBack?: () => void;
+  onMenu?: () => void; // 햄버거 메뉴 클릭
+  onClose?: () => void; // 종 아이콘 클릭
   rightComponent?: React.ReactNode;
 }
 
@@ -15,20 +20,39 @@ interface HeaderProps {
 export const Header: React.FC<HeaderProps> = ({
   title,
   onBack,
+  onMenu,
+  onClose,
   rightComponent,
 }) => {
+  const user = useUserStore((state) => state.user);
+
   return (
     <View style={styles.container}>
       <View style={styles.left}>
-        {onBack && (
+        {onMenu ? (
+          <View style={styles.leftButtons}>
+            <TouchableOpacity onPress={onMenu} style={styles.menuButton}>
+              <MaterialIcons name="menu" size={24} color={Colors.primary} />
+            </TouchableOpacity>
+            {onClose && (
+              <TouchableOpacity onPress={onClose} style={[styles.closeButton, { marginLeft: 0}]}>
+                <Ionicons name="notifications-outline" size={24} color={Colors.primary} />
+              </TouchableOpacity>
+            )}
+          </View>
+        ) : onBack ? (
           <TouchableOpacity onPress={onBack} style={styles.backButton}>
-            <Text style={styles.backText}>←</Text>
+            <MaterialIcons name="arrow-back" size={24} color={Colors.primary} />
           </TouchableOpacity>
-        )}
+        ) : null}
       </View>
-      <Text style={styles.title}>{title}</Text>
+      {title && <Text style={styles.title}>{title}</Text>}
       <View style={styles.right}>
-        {rightComponent}
+        {user ? (
+          <Text style={styles.userGreeting}>{user.name}님! 반갑습니다.</Text>
+        ) : (
+          rightComponent
+        )}
       </View>
     </View>
   );
@@ -49,6 +73,10 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'flex-start',
   },
+  leftButtons: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
   right: {
     flex: 1,
     alignItems: 'flex-end',
@@ -61,10 +89,23 @@ const styles = StyleSheet.create({
   },
   backButton: {
     padding: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  backText: {
-    fontSize: 24,
-    color: Colors.primary,
+  menuButton: {
+    padding: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  closeButton: {
+    padding: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  userGreeting: {
+    ...Typography.text.body,
+    color: Colors.text,
+    fontSize: 14,
   },
 });
 

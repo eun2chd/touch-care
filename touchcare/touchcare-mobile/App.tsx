@@ -6,12 +6,13 @@ import { Animated } from 'react-native';
 import { LoginScreen } from './src/screens/LoginScreen';
 import { HomeScreen } from './src/screens/HomeScreen';
 import { DetailScreen } from './src/screens/DetailScreen';
+import { SignUpScreen } from './src/screens/SignUpScreen';
 import { LoadingScreen } from './src/components/LoadingScreen';
 
 // 스플래시 스크린을 자동으로 숨기지 않도록 설정
 SplashScreen.preventAutoHideAsync();
 
-type Screen = 'Login' | 'Home' | 'Detail';
+type Screen = 'Login' | 'Home' | 'Detail' | 'SignUp';
 
 export default function App() {
   console.log('🚀 App.tsx 로드됨 - 로그인 화면으로 시작');
@@ -99,6 +100,9 @@ export default function App() {
       } else if (currentScreen === 'Home') {
         setIsTransitionLoading(true);
         setNextScreen('Login');
+      } else if (currentScreen === 'SignUp') {
+        setIsTransitionLoading(true);
+        setNextScreen('Login');
       }
     },
   };
@@ -117,6 +121,9 @@ export default function App() {
       case 'Detail':
         console.log('✅ DetailScreen 렌더링');
         return <DetailScreen navigation={navigation} />;
+      case 'SignUp':
+        console.log('✅ SignUpScreen 렌더링');
+        return <SignUpScreen navigation={navigation} />;
       default:
         console.log('⚠️ 기본값: LoginScreen 렌더링');
         return <LoginScreen navigation={navigation} />;

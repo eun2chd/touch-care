@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, StyleSheet, KeyboardAvoidingView, Platform, Image, TouchableOpacity, ScrollView } from 'react-native';
 import { Button } from '../components/Button';
+import { Screen } from '../components/Screen';
 import Colors from '../constants/colors';
 import Typography from '../constants/Typography';
+import { useUserStore, DEFAULT_USER } from '../store/useUserStore';
 
 interface LoginScreenProps {
   navigation: any;
@@ -20,6 +22,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const setUser = useUserStore((state) => state.setUser);
 
   const handleLogin = () => {
     // 입력값 검증
@@ -33,8 +36,9 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
 
     // 하드코딩된 로그인 검증
     if (id === VALID_ID && password === VALID_PASSWORD) {
-      // 로그인 성공
+      // 로그인 성공 - 전역 상태에 사용자 정보 저장
       setTimeout(() => {
+        setUser(DEFAULT_USER);
         setLoading(false);
         navigation.navigate('Home');
       }, 500); // 로딩 효과를 위한 짧은 딜레이
@@ -53,20 +57,20 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
   };
 
   const handleSignUp = () => {
-    // TODO: 회원가입 화면으로 이동
-    console.log('회원가입');
+    navigation.navigate('SignUp');
   };
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-    >
-      <ScrollView
-        contentContainerStyle={styles.scrollContent}
-        keyboardShouldPersistTaps="handled"
+    <Screen>
+      <KeyboardAvoidingView
+        style={styles.container}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
-        <View style={styles.content}>
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+        >
+          <View style={styles.content}>
           {/* 로고 이미지 */}
           <Image
             source={require('../../assets/images/logo.png')}
@@ -141,6 +145,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
+    </Screen>
   );
 };
 
