@@ -3,16 +3,19 @@ import { StatusBar } from 'expo-status-bar';
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
 import { Animated } from 'react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { LoginScreen } from './src/screens/LoginScreen';
 import { HomeScreen } from './src/screens/HomeScreen';
 import { DetailScreen } from './src/screens/DetailScreen';
 import { SignUpScreen } from './src/screens/SignUpScreen';
+import { DeviceScreen } from './src/screens/DeviceScreen';
+import { MyPageScreen } from './src/screens/MyPageScreen';
 import { LoadingScreen } from './src/components/LoadingScreen';
 
 // 스플래시 스크린을 자동으로 숨기지 않도록 설정
 SplashScreen.preventAutoHideAsync();
 
-type Screen = 'Login' | 'Home' | 'Detail' | 'SignUp';
+type Screen = 'Login' | 'Home' | 'Detail' | 'SignUp' | 'Device' | 'MyPage';
 
 export default function App() {
   console.log('🚀 App.tsx 로드됨 - 로그인 화면으로 시작');
@@ -83,7 +86,11 @@ export default function App() {
 
   // 폰트 로딩 중이거나 초기 로딩 중
   if (!fontsLoaded || isInitialLoading) {
-    return <LoadingScreen />;
+    return (
+      <SafeAreaProvider>
+        <LoadingScreen />
+      </SafeAreaProvider>
+    );
   }
 
   // 간단한 네비게이션 객체 (로딩 화면 포함)
@@ -103,9 +110,16 @@ export default function App() {
       } else if (currentScreen === 'SignUp') {
         setIsTransitionLoading(true);
         setNextScreen('Login');
+      } else if (currentScreen === 'Device' || currentScreen === 'MyPage') {
+        setIsTransitionLoading(true);
+        setNextScreen('Home');
       }
     },
   };
+
+  // 하단 네비게이션 바를 표시할 화면 목록
+  const screensWithBottomTab = ['Home', 'Device', 'MyPage'];
+  const showBottomTab = screensWithBottomTab.includes(currentScreen);
 
   // 화면 렌더링
   const renderScreen = () => {
@@ -124,6 +138,12 @@ export default function App() {
       case 'SignUp':
         console.log('✅ SignUpScreen 렌더링');
         return <SignUpScreen navigation={navigation} />;
+      case 'Device':
+        console.log('✅ DeviceScreen 렌더링');
+        return <DeviceScreen navigation={navigation} />;
+      case 'MyPage':
+        console.log('✅ MyPageScreen 렌더링');
+        return <MyPageScreen navigation={navigation} />;
       default:
         console.log('⚠️ 기본값: LoginScreen 렌더링');
         return <LoginScreen navigation={navigation} />;
@@ -135,19 +155,19 @@ export default function App() {
   // 화면 전환 로딩 중
   if (isTransitionLoading) {
     return (
-      <>
+      <SafeAreaProvider>
         <LoadingScreen />
         <StatusBar style="auto" />
-      </>
+      </SafeAreaProvider>
     );
   }
 
   return (
-    <>
+    <SafeAreaProvider>
       <Animated.View style={{ flex: 1, opacity: fadeAnim }}>
         {renderScreen()}
       </Animated.View>
       <StatusBar style="auto" />
-    </>
+    </SafeAreaProvider>
   );
 }

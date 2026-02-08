@@ -25,7 +25,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   };
 
   return (
-    <Screen>
+    <Screen showBottomTab={true} currentScreen="Home" onNavigate={navigation.navigate}>
       <Header 
         onMenu={handleMenu}
         onClose={handleClose}
