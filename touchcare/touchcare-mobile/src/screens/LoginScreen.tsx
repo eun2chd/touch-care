@@ -11,7 +11,7 @@ interface LoginScreenProps {
 }
 
 // 하드코딩된 로그인 정보
-const VALID_ID = 'touch';
+const VALID_ID = 'ntp';
 const VALID_PASSWORD = 'ntp1231';
 
 /**
