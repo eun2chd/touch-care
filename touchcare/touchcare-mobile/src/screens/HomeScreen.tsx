@@ -1,13 +1,16 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 // @ts-ignore - @expo/vector-icons 타입 정의
 import { MaterialIcons } from '@expo/vector-icons';
 import { Header } from '../components/Header';
 import { Button } from '../components/Button';
 import { Screen } from '../components/Screen';
+import { SideMenu } from '../components/SideMenu';
+import { NotificationPanel } from '../components/NotificationPanel';
 import Colors from '../constants/colors';
 import Typography from '../constants/Typography';
 import { useDeviceStore } from '../store/useDeviceStore';
+import { useUserStore } from '../store/useUserStore';
 
 interface HomeScreenProps {
   navigation: any;
@@ -19,19 +22,26 @@ interface HomeScreenProps {
 export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const devices = useDeviceStore((state) => state.devices);
   const loadDevices = useDeviceStore((state) => state.loadDevices);
+  const [isSideMenuVisible, setIsSideMenuVisible] = useState(false);
+  const [isNotificationVisible, setIsNotificationVisible] = useState(false);
 
   useEffect(() => {
     loadDevices();
   }, [loadDevices]);
 
   const handleMenu = () => {
-    // TODO: 메뉴 열기 (사이드 메뉴 등)
-    console.log('메뉴 열기');
+    setIsSideMenuVisible(true);
   };
 
   const handleClose = () => {
-    // TODO: 종 아이콘 클릭 처리 (알림 등)
-    console.log('종 아이콘 클릭');
+    setIsNotificationVisible(true);
+  };
+
+  const clearUser = useUserStore((state) => state.clearUser);
+  
+  const handleLogout = () => {
+    clearUser();
+    navigation.navigate('Login');
   };
 
   const handleAddDevice = () => {
@@ -73,6 +83,16 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
       <Header 
         onMenu={handleMenu}
         onClose={handleClose}
+      />
+      <SideMenu
+        isVisible={isSideMenuVisible}
+        onClose={() => setIsSideMenuVisible(false)}
+        onNavigate={navigation.navigate}
+        onLogout={handleLogout}
+      />
+      <NotificationPanel
+        isVisible={isNotificationVisible}
+        onClose={() => setIsNotificationVisible(false)}
       />
       <ScrollView 
         style={styles.content}
