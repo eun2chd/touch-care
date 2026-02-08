@@ -27,7 +27,7 @@ export const AVAILABLE_DEVICES: Device[] = [
     id: 'device-1',
     name: '터치미니+ #001',
     macAddress: 'AA:BB:CC:DD:EE:01',
-    icon: 'bluetooth',
+    icon: 'devices',
     iconType: 'MaterialIcons',
     isConnected: false,
     addedAt: '',
@@ -56,7 +56,15 @@ export const useDeviceStore = create<DeviceState>((set, get) => ({
       const stored = await AsyncStorage.getItem(STORAGE_KEY);
       if (stored) {
         const devices = JSON.parse(stored);
-        set({ devices });
+        // 기존 디바이스의 아이콘을 'devices'로 마이그레이션
+        const migratedDevices = devices.map((device: Device) => ({
+          ...device,
+          icon: 'devices',
+          iconType: 'MaterialIcons' as const,
+        }));
+        set({ devices: migratedDevices });
+        // 마이그레이션된 데이터 저장
+        await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(migratedDevices));
       }
     } catch (error) {
       console.error('디바이스 로드 실패:', error);

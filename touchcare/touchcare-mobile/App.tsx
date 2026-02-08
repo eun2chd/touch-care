@@ -12,12 +12,15 @@ import { DeviceScreen } from './src/screens/DeviceScreen';
 import { MyPageScreen } from './src/screens/MyPageScreen';
 import { AddDeviceScreen } from './src/screens/AddDeviceScreen';
 import { DeviceDashboardScreen } from './src/screens/DeviceDashboardScreen';
+import { RecordScreen } from './src/screens/RecordScreen';
+import { ReportScreen } from './src/screens/ReportScreen';
+import { SettingsScreen } from './src/screens/SettingsScreen';
 import { LoadingScreen } from './src/components/LoadingScreen';
 
 // 스플래시 스크린을 자동으로 숨기지 않도록 설정
 SplashScreen.preventAutoHideAsync();
 
-type Screen = 'Login' | 'Home' | 'Detail' | 'SignUp' | 'Device' | 'MyPage' | 'AddDevice' | 'DeviceDashboard';
+type Screen = 'Login' | 'Home' | 'Detail' | 'SignUp' | 'Device' | 'MyPage' | 'AddDevice' | 'DeviceDashboard' | 'Record' | 'Report' | 'Settings';
 
 export default function App() {
   console.log('🚀 App.tsx 로드됨 - 로그인 화면으로 시작');
@@ -110,13 +113,16 @@ export default function App() {
       } else if (currentScreen === 'SignUp') {
         setIsTransitionLoading(true);
         setNextScreen('Login');
-      } else if (currentScreen === 'Device' || currentScreen === 'MyPage') {
+      } else if (currentScreen === 'Device' || currentScreen === 'MyPage' || currentScreen === 'Record' || currentScreen === 'Report') {
         setIsTransitionLoading(true);
         setNextScreen('Home');
       } else if (currentScreen === 'AddDevice') {
         setIsTransitionLoading(true);
         setNextScreen('Device');
       } else if (currentScreen === 'DeviceDashboard') {
+        setIsTransitionLoading(true);
+        setNextScreen('Home');
+      } else if (currentScreen === 'Settings') {
         setIsTransitionLoading(true);
         setNextScreen('Home');
       }
@@ -137,7 +143,7 @@ export default function App() {
   }
 
   // 하단 네비게이션 바를 표시할 화면 목록
-  const screensWithBottomTab = ['Home', 'Device', 'MyPage'];
+  const screensWithBottomTab = ['Home', 'Device', 'MyPage', 'Record', 'Report'];
   const showBottomTab = screensWithBottomTab.includes(currentScreen);
 
   // 화면 렌더링
@@ -169,6 +175,15 @@ export default function App() {
       case 'DeviceDashboard':
         console.log('✅ DeviceDashboardScreen 렌더링');
         return <DeviceDashboardScreen navigation={navigation} route={navigation.route} />;
+      case 'Record':
+        console.log('✅ RecordScreen 렌더링');
+        return <RecordScreen navigation={navigation} />;
+      case 'Report':
+        console.log('✅ ReportScreen 렌더링');
+        return <ReportScreen navigation={navigation} />;
+      case 'Settings':
+        console.log('✅ SettingsScreen 렌더링');
+        return <SettingsScreen navigation={navigation} />;
       default:
         console.log('⚠️ 기본값: LoginScreen 렌더링');
         return <LoginScreen navigation={navigation} />;

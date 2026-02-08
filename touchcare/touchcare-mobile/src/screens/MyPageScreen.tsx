@@ -17,16 +17,6 @@ export const MyPageScreen: React.FC<MyPageScreenProps> = ({ navigation }) => {
   const user = useUserStore((state) => state.user);
   const clearUser = useUserStore((state) => state.clearUser);
 
-  const handleMenu = () => {
-    // TODO: 메뉴 열기
-    console.log('메뉴 열기');
-  };
-
-  const handleClose = () => {
-    // TODO: 종 아이콘 클릭 처리 (알림 등)
-    console.log('종 아이콘 클릭');
-  };
-
   const handleLogout = () => {
     clearUser();
     navigation.navigate('Login');
@@ -34,10 +24,7 @@ export const MyPageScreen: React.FC<MyPageScreenProps> = ({ navigation }) => {
 
   return (
     <Screen showBottomTab={true} currentScreen="MyPage" onNavigate={navigation.navigate}>
-      <Header
-        onMenu={handleMenu}
-        onClose={handleClose}
-      />
+      <Header navigation={navigation} />
       <ScrollView style={styles.content}>
         <View style={styles.profileSection}>
           <View style={styles.profileCircle}>

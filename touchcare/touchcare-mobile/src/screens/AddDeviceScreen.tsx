@@ -204,14 +204,15 @@ export const AddDeviceScreen: React.FC<AddDeviceScreenProps> = ({ navigation }) 
     );
   };
 
-  return (
-    <Screen>
-      <Header
-        onBack={handleBack}
-      />
-      <View style={styles.titleContainer}>
-        <Text style={styles.title}>디바이스 추가</Text>
-      </View>
+      return (
+        <Screen>
+          <Header navigation={navigation} />
+          <View style={styles.titleContainer}>
+            <TouchableOpacity onPress={handleBack} style={styles.backButton}>
+              <MaterialIcons name="arrow-back" size={24} color={Colors.primary} />
+            </TouchableOpacity>
+            <Text style={styles.title}>디바이스 추가</Text>
+          </View>
       {currentStep === 'guide' && renderGuideStep()}
       {currentStep === 'bluetooth' && renderBluetoothStep()}
       {currentStep === 'devices' && renderDevicesStep()}
@@ -221,16 +222,25 @@ export const AddDeviceScreen: React.FC<AddDeviceScreenProps> = ({ navigation }) 
 
 const styles = StyleSheet.create({
   titleContainer: {
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
     paddingVertical: 20,
+    paddingHorizontal: 20,
     borderBottomWidth: 1,
     borderBottomColor: '#f0f0f0',
+  },
+  backButton: {
+    marginRight: 16,
+    padding: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   title: {
     ...Typography.text.h3,
     color: Colors.primary,
     fontWeight: 'bold',
+    flex: 1,
+    textAlign: 'center',
   },
   content: {
     flex: 1,

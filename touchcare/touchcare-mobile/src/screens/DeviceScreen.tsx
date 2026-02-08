@@ -27,16 +27,6 @@ export const DeviceScreen: React.FC<DeviceScreenProps> = ({ navigation }) => {
     loadDevices();
   }, [loadDevices]);
 
-  const handleMenu = () => {
-    // TODO: 메뉴 열기
-    console.log('메뉴 열기');
-  };
-
-  const handleClose = () => {
-    // TODO: 종 아이콘 클릭 처리 (알림 등)
-    console.log('종 아이콘 클릭');
-  };
-
   const handleAddDevice = () => {
     navigation.navigate('AddDevice');
   };
@@ -62,10 +52,7 @@ export const DeviceScreen: React.FC<DeviceScreenProps> = ({ navigation }) => {
   if (devices.length === 0) {
     return (
       <Screen showBottomTab={true} currentScreen="Device" onNavigate={navigation.navigate}>
-        <Header
-          onMenu={handleMenu}
-          onClose={handleClose}
-        />
+        <Header navigation={navigation} />
         <ScrollView 
           style={styles.content}
           contentContainerStyle={styles.scrollContent}
@@ -91,10 +78,7 @@ export const DeviceScreen: React.FC<DeviceScreenProps> = ({ navigation }) => {
 
   return (
     <Screen showBottomTab={true} currentScreen="Device" onNavigate={navigation.navigate}>
-      <Header
-        onMenu={handleMenu}
-        onClose={handleClose}
-      />
+      <Header navigation={navigation} />
       <ScrollView 
         style={styles.content}
         contentContainerStyle={styles.devicesContent}

@@ -126,7 +126,7 @@ export const DeviceDashboardScreen: React.FC<DeviceDashboardScreenProps> = ({ na
 
   return (
     <Screen showBottomTab={true} currentScreen="Home" onNavigate={navigation.navigate}>
-      <Header onMenu={() => {}} onClose={() => {}} />
+      <Header navigation={navigation} />
       <View style={styles.titleContainer}>
         <TouchableOpacity onPress={handleBack} style={styles.backButton}>
           <MaterialIcons name="arrow-back" size={24} color={Colors.primary} />

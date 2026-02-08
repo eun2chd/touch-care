@@ -1,60 +1,86 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 // @ts-ignore - @expo/vector-icons 타입 정의
 import { MaterialIcons, Ionicons } from '@expo/vector-icons';
 import Colors from '../constants/colors';
 import Typography from '../constants/Typography';
 import { useUserStore } from '../store/useUserStore';
+import { SideMenu } from './SideMenu';
+import { NotificationPanel } from './NotificationPanel';
 
 interface HeaderProps {
   title?: string; // 선택사항으로 변경
-  onBack?: () => void;
-  onMenu?: () => void; // 햄버거 메뉴 클릭
-  onClose?: () => void; // 종 아이콘 클릭
+  navigation?: any; // 네비게이션 객체
   rightComponent?: React.ReactNode;
 }
 
 /**
- * 헤더 컴포넌트
+ * 헤더 컴포넌트 (사이드 메뉴와 알림 패널 포함)
  */
 export const Header: React.FC<HeaderProps> = ({
   title,
-  onBack,
-  onMenu,
-  onClose,
+  navigation,
   rightComponent,
 }) => {
   const user = useUserStore((state) => state.user);
+  const clearUser = useUserStore((state) => state.clearUser);
+  const [isSideMenuVisible, setIsSideMenuVisible] = useState(false);
+  const [isNotificationVisible, setIsNotificationVisible] = useState(false);
+
+  const handleMenu = () => {
+    setIsSideMenuVisible(true);
+  };
+
+  const handleClose = () => {
+    setIsNotificationVisible(true);
+  };
+
+  const handleLogout = () => {
+    clearUser();
+    if (navigation) {
+      navigation.navigate('Login');
+    }
+  };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.left}>
-        {onMenu ? (
-          <View style={styles.leftButtons}>
-            <TouchableOpacity onPress={onMenu} style={styles.menuButton}>
-              <MaterialIcons name="menu" size={24} color={Colors.primary} />
-            </TouchableOpacity>
-            {onClose && (
-              <TouchableOpacity onPress={onClose} style={[styles.closeButton, { marginLeft: 0}]}>
+    <>
+      <View style={styles.container}>
+        <View style={styles.left}>
+          {navigation ? (
+            <View style={styles.leftButtons}>
+              <TouchableOpacity onPress={handleMenu} style={styles.menuButton}>
+                <MaterialIcons name="menu" size={24} color={Colors.primary} />
+              </TouchableOpacity>
+              <TouchableOpacity onPress={handleClose} style={[styles.closeButton, { marginLeft: 0}]}>
                 <Ionicons name="notifications-outline" size={24} color={Colors.primary} />
               </TouchableOpacity>
-            )}
-          </View>
-        ) : onBack ? (
-          <TouchableOpacity onPress={onBack} style={styles.backButton}>
-            <MaterialIcons name="arrow-back" size={24} color={Colors.primary} />
-          </TouchableOpacity>
-        ) : null}
+            </View>
+          ) : null}
+        </View>
+        {title && <Text style={styles.title}>{title}</Text>}
+        <View style={styles.right}>
+          {user ? (
+            <Text style={styles.userGreeting}>{user.name}님! 반갑습니다.</Text>
+          ) : (
+            rightComponent
+          )}
+        </View>
       </View>
-      {title && <Text style={styles.title}>{title}</Text>}
-      <View style={styles.right}>
-        {user ? (
-          <Text style={styles.userGreeting}>{user.name}님! 반갑습니다.</Text>
-        ) : (
-          rightComponent
-        )}
-      </View>
-    </View>
+      {navigation && (
+        <>
+          <SideMenu
+            isVisible={isSideMenuVisible}
+            onClose={() => setIsSideMenuVisible(false)}
+            onNavigate={navigation.navigate}
+            onLogout={handleLogout}
+          />
+          <NotificationPanel
+            isVisible={isNotificationVisible}
+            onClose={() => setIsNotificationVisible(false)}
+          />
+        </>
+      )}
+    </>
   );
 };
 
@@ -86,11 +112,6 @@ const styles = StyleSheet.create({
     color: Colors.primary,
     flex: 2,
     textAlign: 'center',
-  },
-  backButton: {
-    padding: 8,
-    justifyContent: 'center',
-    alignItems: 'center',
   },
   menuButton: {
     padding: 8,

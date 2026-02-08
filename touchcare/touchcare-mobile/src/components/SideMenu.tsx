@@ -164,7 +164,7 @@ export const SideMenu: React.FC<SideMenuProps> = ({
           <TouchableOpacity
             style={styles.footerItem}
             onPress={() => {
-              // TODO: 설정 화면으로 이동
+              onNavigate('Settings');
               onClose();
             }}
             activeOpacity={0.7}

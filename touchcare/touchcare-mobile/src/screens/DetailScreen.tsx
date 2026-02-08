@@ -13,22 +13,9 @@ interface DetailScreenProps {
  * 상세 화면
  */
 export const DetailScreen: React.FC<DetailScreenProps> = ({ navigation }) => {
-  const handleMenu = () => {
-    // TODO: 메뉴 열기
-    console.log('메뉴 열기');
-  };
-
-  const handleClose = () => {
-    // TODO: 종 아이콘 클릭 처리 (알림 등)
-    console.log('종 아이콘 클릭');
-  };
-
   return (
     <Screen>
-      <Header
-        onMenu={handleMenu}
-        onClose={handleClose}
-      />
+      <Header navigation={navigation} />
       <ScrollView style={styles.content}>
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>터치 데이터</Text>

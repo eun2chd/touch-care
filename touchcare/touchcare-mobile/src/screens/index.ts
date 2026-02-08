@@ -6,3 +6,6 @@ export { DeviceScreen } from './DeviceScreen';
 export { MyPageScreen } from './MyPageScreen';
 export { AddDeviceScreen } from './AddDeviceScreen';
 export { DeviceDashboardScreen } from './DeviceDashboardScreen';
+export { RecordScreen } from './RecordScreen';
+export { ReportScreen } from './ReportScreen';
+export { SettingsScreen } from './SettingsScreen';

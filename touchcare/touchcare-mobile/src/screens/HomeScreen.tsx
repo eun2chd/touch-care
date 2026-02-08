@@ -1,16 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 // @ts-ignore - @expo/vector-icons 타입 정의
 import { MaterialIcons } from '@expo/vector-icons';
 import { Header } from '../components/Header';
-import { Button } from '../components/Button';
 import { Screen } from '../components/Screen';
-import { SideMenu } from '../components/SideMenu';
-import { NotificationPanel } from '../components/NotificationPanel';
 import Colors from '../constants/colors';
 import Typography from '../constants/Typography';
 import { useDeviceStore } from '../store/useDeviceStore';
-import { useUserStore } from '../store/useUserStore';
 
 interface HomeScreenProps {
   navigation: any;
@@ -22,27 +18,10 @@ interface HomeScreenProps {
 export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const devices = useDeviceStore((state) => state.devices);
   const loadDevices = useDeviceStore((state) => state.loadDevices);
-  const [isSideMenuVisible, setIsSideMenuVisible] = useState(false);
-  const [isNotificationVisible, setIsNotificationVisible] = useState(false);
 
   useEffect(() => {
     loadDevices();
   }, [loadDevices]);
-
-  const handleMenu = () => {
-    setIsSideMenuVisible(true);
-  };
-
-  const handleClose = () => {
-    setIsNotificationVisible(true);
-  };
-
-  const clearUser = useUserStore((state) => state.clearUser);
-  
-  const handleLogout = () => {
-    clearUser();
-    navigation.navigate('Login');
-  };
 
   const handleAddDevice = () => {
     navigation.navigate('Device');
@@ -51,10 +30,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   if (devices.length === 0) {
     return (
       <Screen showBottomTab={true} currentScreen="Home" onNavigate={navigation.navigate}>
-        <Header 
-          onMenu={handleMenu}
-          onClose={handleClose}
-        />
+        <Header navigation={navigation} />
         <ScrollView 
           style={styles.content}
           contentContainerStyle={styles.scrollContent}
@@ -80,20 +56,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
 
   return (
     <Screen showBottomTab={true} currentScreen="Home" onNavigate={navigation.navigate}>
-      <Header 
-        onMenu={handleMenu}
-        onClose={handleClose}
-      />
-      <SideMenu
-        isVisible={isSideMenuVisible}
-        onClose={() => setIsSideMenuVisible(false)}
-        onNavigate={navigation.navigate}
-        onLogout={handleLogout}
-      />
-      <NotificationPanel
-        isVisible={isNotificationVisible}
-        onClose={() => setIsNotificationVisible(false)}
-      />
+      <Header navigation={navigation} />
       <ScrollView 
         style={styles.content}
         contentContainerStyle={styles.devicesContent}
@@ -110,21 +73,19 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
           </TouchableOpacity>
         </View>
         {devices.map((device) => {
-          const IconComponent = device.iconType === 'MaterialIcons' ? MaterialIcons : MaterialIcons;
           return (
             <TouchableOpacity
               key={device.id}
               style={styles.deviceCard}
               onPress={() => {
-                console.log('디바이스 클릭:', device.name);
                 navigation.navigate('DeviceDashboard', { device });
               }}
               activeOpacity={0.7}
             >
               <View style={styles.deviceCardLeft}>
                 <View style={styles.deviceIconContainer}>
-                  <IconComponent
-                    name={device.icon as any}
+                  <MaterialIcons
+                    name="devices"
                     size={32}
                     color={Colors.primary}
                   />
