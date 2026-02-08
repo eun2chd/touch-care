@@ -1,10 +1,13 @@
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import React, { useEffect } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+// @ts-ignore - @expo/vector-icons 타입 정의
+import { MaterialIcons } from '@expo/vector-icons';
 import { Header } from '../components/Header';
 import { Button } from '../components/Button';
 import { Screen } from '../components/Screen';
 import Colors from '../constants/colors';
 import Typography from '../constants/Typography';
+import { useDeviceStore } from '../store/useDeviceStore';
 
 interface HomeScreenProps {
   navigation: any;
@@ -14,6 +17,13 @@ interface HomeScreenProps {
  * 홈 화면
  */
 export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
+  const devices = useDeviceStore((state) => state.devices);
+  const loadDevices = useDeviceStore((state) => state.loadDevices);
+
+  useEffect(() => {
+    loadDevices();
+  }, [loadDevices]);
+
   const handleMenu = () => {
     // TODO: 메뉴 열기 (사이드 메뉴 등)
     console.log('메뉴 열기');
@@ -24,57 +34,167 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
     console.log('종 아이콘 클릭');
   };
 
+  const handleAddDevice = () => {
+    navigation.navigate('Device');
+  };
+
+  if (devices.length === 0) {
+    return (
+      <Screen showBottomTab={true} currentScreen="Home" onNavigate={navigation.navigate}>
+        <Header 
+          onMenu={handleMenu}
+          onClose={handleClose}
+        />
+        <ScrollView 
+          style={styles.content}
+          contentContainerStyle={styles.scrollContent}
+        >
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyTitle}>연결된 디바이스 정보가 없습니다.</Text>
+            <Text style={styles.emptyText}>
+              터치 데이터를 수집하기 위해 디바이스를 추가해보세요.
+            </Text>
+            <TouchableOpacity
+              style={styles.addButton}
+              onPress={handleAddDevice}
+              activeOpacity={0.7}
+            >
+              <MaterialIcons name="add" size={24} color="#fff" />
+              <Text style={styles.addButtonText}>디바이스 추가하기</Text>
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+      </Screen>
+    );
+  }
+
   return (
     <Screen showBottomTab={true} currentScreen="Home" onNavigate={navigation.navigate}>
       <Header 
         onMenu={handleMenu}
         onClose={handleClose}
       />
-      <ScrollView style={styles.content}>
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>오늘의 마음 기록</Text>
-          <Text style={styles.cardText}>
-            오늘 하루는 어떠셨나요? 터치 데이터를 통해 감정을 기록해보세요.
-          </Text>
-          <Button
-            title="기록하기"
-            onPress={() => navigation.navigate('Detail')}
-            variant="secondary"
-            style={styles.button}
-          />
+      <ScrollView 
+        style={styles.content}
+        contentContainerStyle={styles.devicesContent}
+      >
+        <View style={styles.devicesHeader}>
+          <Text style={styles.devicesTitle}>연결된 디바이스</Text>
+          <TouchableOpacity
+            style={styles.addButtonSmall}
+            onPress={handleAddDevice}
+            activeOpacity={0.7}
+          >
+            <MaterialIcons name="add" size={20} color={Colors.primary} />
+            <Text style={styles.addButtonSmallText}>추가</Text>
+          </TouchableOpacity>
         </View>
-
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>데이터 리포트</Text>
-          <Text style={styles.cardText}>
-            수집된 데이터를 분석하여 리포트를 확인할 수 있습니다.
-          </Text>
-          <Button
-            title="리포트 보기"
-            onPress={() => {}}
-            variant="primary"
-            style={styles.button}
-          />
-        </View>
+        {devices.map((device) => {
+          const IconComponent = device.iconType === 'MaterialIcons' ? MaterialIcons : MaterialIcons;
+          return (
+            <View key={device.id} style={styles.deviceCard}>
+              <View style={styles.deviceCardLeft}>
+                <View style={styles.deviceIconContainer}>
+                  <IconComponent
+                    name={device.icon as any}
+                    size={32}
+                    color={Colors.primary}
+                  />
+                </View>
+                <View style={styles.deviceInfo}>
+                  <Text style={styles.deviceName}>{device.name}</Text>
+                  <Text style={styles.deviceMac}>{device.macAddress}</Text>
+                  <View style={[styles.statusBadge, { backgroundColor: device.isConnected ? Colors.success : Colors.textLight }]}>
+                    <Text style={styles.statusText}>
+                      {device.isConnected ? '연결됨' : '연결 안 됨'}
+                    </Text>
+                  </View>
+                </View>
+              </View>
+            </View>
+          );
+        })}
       </ScrollView>
     </Screen>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.background,
-  },
   content: {
     flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
     padding: 20,
   },
-  card: {
+  emptyContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%',
+  },
+  emptyTitle: {
+    ...Typography.text.h3,
+    color: Colors.text,
+    marginBottom: 12,
+    textAlign: 'center',
+  },
+  emptyText: {
+    ...Typography.text.body,
+    color: Colors.textLight,
+    marginBottom: 32,
+    textAlign: 'center',
+    lineHeight: 24,
+  },
+  addButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.primary,
+    paddingVertical: 14,
+    paddingHorizontal: 28,
+    borderRadius: 8,
+    minWidth: 200,
+    gap: 8,
+  },
+  addButtonText: {
+    ...Typography.text.bodyMedium,
+    color: '#fff',
+  },
+  devicesContent: {
+    padding: 20,
+  },
+  devicesHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  devicesTitle: {
+    ...Typography.text.h4,
+    color: Colors.primary,
+  },
+  addButtonSmall: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+  },
+  addButtonSmallText: {
+    ...Typography.text.body,
+    color: Colors.primary,
+    fontWeight: '600',
+  },
+  deviceCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     backgroundColor: Colors.background,
     borderRadius: 12,
-    padding: 24,
-    marginBottom: 16,
+    padding: 16,
+    marginBottom: 12,
     borderWidth: 1,
     borderColor: Colors.iceBlue,
     shadowColor: '#000',
@@ -83,19 +203,44 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 3,
   },
-  cardTitle: {
-    ...Typography.text.h3,
-    color: Colors.primary,
-    marginBottom: 12,
+  deviceCardLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
   },
-  cardText: {
-    ...Typography.text.body,
+  deviceIconContainer: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: Colors.iceBlue,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 16,
+  },
+  deviceInfo: {
+    flex: 1,
+  },
+  deviceName: {
+    ...Typography.text.h4,
     color: Colors.text,
-    marginBottom: 20,
-    lineHeight: 24,
+    marginBottom: 4,
   },
-  button: {
-    marginTop: 8,
+  deviceMac: {
+    ...Typography.text.caption,
+    color: Colors.textLight,
+    marginBottom: 8,
+  },
+  statusBadge: {
+    alignSelf: 'flex-start',
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  statusText: {
+    ...Typography.text.caption,
+    color: '#fff',
+    fontSize: 11,
+    fontWeight: '600',
   },
 });
 

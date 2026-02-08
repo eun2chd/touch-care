@@ -10,12 +10,13 @@ import { DetailScreen } from './src/screens/DetailScreen';
 import { SignUpScreen } from './src/screens/SignUpScreen';
 import { DeviceScreen } from './src/screens/DeviceScreen';
 import { MyPageScreen } from './src/screens/MyPageScreen';
+import { AddDeviceScreen } from './src/screens/AddDeviceScreen';
 import { LoadingScreen } from './src/components/LoadingScreen';
 
 // 스플래시 스크린을 자동으로 숨기지 않도록 설정
 SplashScreen.preventAutoHideAsync();
 
-type Screen = 'Login' | 'Home' | 'Detail' | 'SignUp' | 'Device' | 'MyPage';
+type Screen = 'Login' | 'Home' | 'Detail' | 'SignUp' | 'Device' | 'MyPage' | 'AddDevice';
 
 export default function App() {
   console.log('🚀 App.tsx 로드됨 - 로그인 화면으로 시작');
@@ -113,6 +114,9 @@ export default function App() {
       } else if (currentScreen === 'Device' || currentScreen === 'MyPage') {
         setIsTransitionLoading(true);
         setNextScreen('Home');
+      } else if (currentScreen === 'AddDevice') {
+        setIsTransitionLoading(true);
+        setNextScreen('Device');
       }
     },
   };
@@ -144,6 +148,9 @@ export default function App() {
       case 'MyPage':
         console.log('✅ MyPageScreen 렌더링');
         return <MyPageScreen navigation={navigation} />;
+      case 'AddDevice':
+        console.log('✅ AddDeviceScreen 렌더링');
+        return <AddDeviceScreen navigation={navigation} />;
       default:
         console.log('⚠️ 기본값: LoginScreen 렌더링');
         return <LoginScreen navigation={navigation} />;
