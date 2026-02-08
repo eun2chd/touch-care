@@ -123,8 +123,8 @@ export const DeviceScreen: React.FC<DeviceScreenProps> = ({ navigation }) => {
                   />
                 </View>
                 <View style={styles.deviceInfo}>
-                  <Text style={styles.deviceName}>{device.name}</Text>
-                  <Text style={styles.deviceMac}>{device.macAddress}</Text>
+                  <Text style={styles.deviceName}>기기명 : {device.name}</Text>
+                  <Text style={styles.deviceMac}>MAC : {device.macAddress}</Text>
                   <View style={[styles.statusBadge, { backgroundColor: device.isConnected ? Colors.success : Colors.textLight }]}>
                     <Text style={styles.statusText}>
                       {device.isConnected ? '연결됨' : '연결 안 됨'}

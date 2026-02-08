@@ -92,7 +92,15 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
         {devices.map((device) => {
           const IconComponent = device.iconType === 'MaterialIcons' ? MaterialIcons : MaterialIcons;
           return (
-            <View key={device.id} style={styles.deviceCard}>
+            <TouchableOpacity
+              key={device.id}
+              style={styles.deviceCard}
+              onPress={() => {
+                console.log('디바이스 클릭:', device.name);
+                navigation.navigate('DeviceDashboard', { device });
+              }}
+              activeOpacity={0.7}
+            >
               <View style={styles.deviceCardLeft}>
                 <View style={styles.deviceIconContainer}>
                   <IconComponent
@@ -102,8 +110,8 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                   />
                 </View>
                 <View style={styles.deviceInfo}>
-                  <Text style={styles.deviceName}>{device.name}</Text>
-                  <Text style={styles.deviceMac}>{device.macAddress}</Text>
+                  <Text style={styles.deviceName}>기기명 : {device.name}</Text>
+                  <Text style={styles.deviceMac}>MAC : {device.macAddress}</Text>
                   <View style={[styles.statusBadge, { backgroundColor: device.isConnected ? Colors.success : Colors.textLight }]}>
                     <Text style={styles.statusText}>
                       {device.isConnected ? '연결됨' : '연결 안 됨'}
@@ -111,7 +119,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                   </View>
                 </View>
               </View>
-            </View>
+            </TouchableOpacity>
           );
         })}
       </ScrollView>

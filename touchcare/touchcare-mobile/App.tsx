@@ -11,12 +11,13 @@ import { SignUpScreen } from './src/screens/SignUpScreen';
 import { DeviceScreen } from './src/screens/DeviceScreen';
 import { MyPageScreen } from './src/screens/MyPageScreen';
 import { AddDeviceScreen } from './src/screens/AddDeviceScreen';
+import { DeviceDashboardScreen } from './src/screens/DeviceDashboardScreen';
 import { LoadingScreen } from './src/components/LoadingScreen';
 
 // 스플래시 스크린을 자동으로 숨기지 않도록 설정
 SplashScreen.preventAutoHideAsync();
 
-type Screen = 'Login' | 'Home' | 'Detail' | 'SignUp' | 'Device' | 'MyPage' | 'AddDevice';
+type Screen = 'Login' | 'Home' | 'Detail' | 'SignUp' | 'Device' | 'MyPage' | 'AddDevice' | 'DeviceDashboard';
 
 export default function App() {
   console.log('🚀 App.tsx 로드됨 - 로그인 화면으로 시작');
@@ -32,6 +33,7 @@ export default function App() {
   const [isInitialLoading, setIsInitialLoading] = useState(true); // 초기 로딩 상태
   const [isTransitionLoading, setIsTransitionLoading] = useState(false); // 화면 전환 로딩 상태
   const [nextScreen, setNextScreen] = useState<Screen | null>(null); // 다음 화면
+  const [screenParams, setScreenParams] = useState<any>(null); // 화면 파라미터
   const fadeAnim = useRef(new Animated.Value(0)).current; // 페이드 애니메이션
   
   // 초기 로딩 (3초)
@@ -85,19 +87,16 @@ export default function App() {
     }
   }, [nextScreen, isTransitionLoading, fadeAnim]);
 
-  // 폰트 로딩 중이거나 초기 로딩 중
-  if (!fontsLoaded || isInitialLoading) {
-    return (
-      <SafeAreaProvider>
-        <LoadingScreen />
-      </SafeAreaProvider>
-    );
-  }
-
-  // 간단한 네비게이션 객체 (로딩 화면 포함)
-  const navigation = {
-    navigate: (screen: Screen) => {
+  // 간단한 네비게이션 객체 (로딩 화면 포함) - Hook 순서를 위해 조건부 렌더링 전에 정의
+  const navigation = React.useMemo(() => ({
+    navigate: (screen: Screen, params?: any) => {
+      console.log('네비게이션 호출:', screen, params);
       // 화면 전환 시 로딩 화면 표시
+      if (params) {
+        setScreenParams(params);
+      } else {
+        setScreenParams(null);
+      }
       setIsTransitionLoading(true);
       setNextScreen(screen);
     },
@@ -117,9 +116,25 @@ export default function App() {
       } else if (currentScreen === 'AddDevice') {
         setIsTransitionLoading(true);
         setNextScreen('Device');
+      } else if (currentScreen === 'DeviceDashboard') {
+        setIsTransitionLoading(true);
+        setNextScreen('Home');
       }
+      setScreenParams(null);
     },
-  };
+    get route() {
+      return { params: screenParams };
+    },
+  }), [currentScreen, screenParams]);
+
+  // 폰트 로딩 중이거나 초기 로딩 중
+  if (!fontsLoaded || isInitialLoading) {
+    return (
+      <SafeAreaProvider>
+        <LoadingScreen />
+      </SafeAreaProvider>
+    );
+  }
 
   // 하단 네비게이션 바를 표시할 화면 목록
   const screensWithBottomTab = ['Home', 'Device', 'MyPage'];
@@ -151,6 +166,9 @@ export default function App() {
       case 'AddDevice':
         console.log('✅ AddDeviceScreen 렌더링');
         return <AddDeviceScreen navigation={navigation} />;
+      case 'DeviceDashboard':
+        console.log('✅ DeviceDashboardScreen 렌더링');
+        return <DeviceDashboardScreen navigation={navigation} route={navigation.route} />;
       default:
         console.log('⚠️ 기본값: LoginScreen 렌더링');
         return <LoginScreen navigation={navigation} />;
