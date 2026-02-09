@@ -1,5 +1,5 @@
-import React, { useState, useRef, useMemo, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Vibration, Animated, Dimensions } from 'react-native';
+import React, { useState, useRef } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Vibration } from 'react-native';
 // @ts-ignore - @expo/vector-icons 타입 정의
 import { MaterialIcons } from '@expo/vector-icons';
 // @ts-ignore - expo-haptics 타입 정의
@@ -24,52 +24,11 @@ interface DeviceDashboardScreenProps {
 /**
  * 디바이스 대시보드 화면
  */
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
-
 export const DeviceDashboardScreen: React.FC<DeviceDashboardScreenProps> = ({ navigation, route }) => {
   const device = route?.params?.device;
   const [totalTouches, setTotalTouches] = useState(0);
   const [progress, setProgress] = useState(0);
-  const [isMentalStateExpanded, setIsMentalStateExpanded] = useState(true);
   const rippleTrigger = useRef(0);
-  const widthAnim = useRef(new Animated.Value(1)).current; // 1 = 펼침, 0 = 접힘
-
-  // 터치 횟수에 따른 심리상태 계산
-  const mentalState = useMemo(() => {
-    if (totalTouches >= 1000) {
-      return {
-        level: 'high',
-        label: '매우 활발',
-        color: Colors.success,
-        icon: '😊',
-        description: '1000회 이상 터치',
-      };
-    } else if (totalTouches >= 500) {
-      return {
-        level: 'medium',
-        label: '활발',
-        color: Colors.secondary,
-        icon: '🙂',
-        description: '500회 이상 터치',
-      };
-    } else if (totalTouches >= 100) {
-      return {
-        level: 'normal',
-        label: '보통',
-        color: Colors.primary,
-        icon: '😐',
-        description: '100회 이상 터치',
-      };
-    } else {
-      return {
-        level: 'low',
-        label: '관찰 필요',
-        color: Colors.textLight,
-        icon: '😔',
-        description: '100회 미만 터치',
-      };
-    }
-  }, [totalTouches]);
 
   const handleBack = () => {
     navigation.goBack();
@@ -79,18 +38,6 @@ export const DeviceDashboardScreen: React.FC<DeviceDashboardScreenProps> = ({ na
     setTotalTouches(0);
     setProgress(0);
   };
-
-  const toggleMentalState = () => {
-    const toValue = isMentalStateExpanded ? 0 : 1;
-    setIsMentalStateExpanded(!isMentalStateExpanded);
-    
-    Animated.timing(widthAnim, {
-      toValue,
-      duration: 300,
-      useNativeDriver: false, // width는 useNativeDriver를 사용할 수 없음
-    }).start();
-  };
-
 
   const handleTouch = async () => {
     // 햅틱 피드백 (진동)
@@ -136,76 +83,6 @@ export const DeviceDashboardScreen: React.FC<DeviceDashboardScreenProps> = ({ na
           <Text style={styles.subtitle}>{device.macAddress}</Text>
         </View>
       </View>
-      
-      {/* 심리상태 배지 */}
-      <View style={styles.mentalStateContainer}>
-        <Animated.View
-          style={[
-            styles.mentalStateBadge,
-            {
-              backgroundColor: mentalState.color + '20',
-              width: widthAnim.interpolate({
-                inputRange: [0, 1],
-                outputRange: [80, SCREEN_WIDTH - 40], // 접힘: 72px (이모지 + 패딩), 펼침: 전체 너비
-              }),
-              minHeight: 60,
-              overflow: 'visible',
-            },
-          ]}
-        >
-          <TouchableOpacity
-            style={styles.mentalStateBadgeContent}
-            onPress={toggleMentalState}
-            activeOpacity={0.7}
-          >
-            <Animated.View
-              style={{
-                marginRight: widthAnim.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: [0, 12],
-                }),
-              }}
-            >
-              <Text style={styles.mentalStateIcon}>{mentalState.icon}</Text>
-            </Animated.View>
-            <Animated.View
-              style={{
-                opacity: widthAnim,
-                width: widthAnim.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: [0, SCREEN_WIDTH - 140],
-                }),
-                overflow: 'visible',
-                flex: 1,
-              }}
-            >
-              {isMentalStateExpanded && (
-                <View style={styles.mentalStateInfo}>
-                  <Text style={[styles.mentalStateLabel, { color: mentalState.color }]}>
-                    {mentalState.label}
-                  </Text>
-                  <Text style={styles.mentalStateDescription}>
-                    {mentalState.description}
-                  </Text>
-                </View>
-              )}
-            </Animated.View>
-            <Animated.View
-              style={{
-                opacity: widthAnim,
-              }}
-            >
-              <MaterialIcons
-                name="keyboard-arrow-left"
-                size={20}
-                color={mentalState.color}
-                style={styles.expandIcon}
-              />
-            </Animated.View>
-          </TouchableOpacity>
-        </Animated.View>
-      </View>
-
 
       <ScrollView 
         style={styles.content}
@@ -259,9 +136,6 @@ export const DeviceDashboardScreen: React.FC<DeviceDashboardScreenProps> = ({ na
               </Text>
               <Text style={styles.recordingText}>기록중...</Text>
             </View>
-            <Text style={styles.instructionText}>
-              현재는 목업 디자인입니다{'\n'}실제는 기기 터치시 숫자가 올라가는 형태입니다
-            </Text>
           </View>
         </View>
       </ScrollView>
@@ -297,67 +171,6 @@ const styles = StyleSheet.create({
   subtitle: {
     ...Typography.text.caption,
     color: Colors.textLight,
-  },
-  mentalStateContainer: {
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    backgroundColor: Colors.background,
-    overflow: 'hidden',
-    position: 'relative',
-  },
-  collapsedBadge: {
-    position: 'absolute',
-    left: 0,
-    top: 0,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 12,
-    paddingLeft: 20,
-    borderRadius: 0,
-    borderTopRightRadius: 12,
-    borderBottomRightRadius: 12,
-    borderWidth: 1,
-    borderLeftWidth: 0,
-    borderColor: Colors.iceBlue,
-    backgroundColor: Colors.background,
-    zIndex: 5,
-    marginTop: 16,
-  },
-  mentalStateBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 16,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: Colors.iceBlue,
-    minWidth: 72,
-    minHeight: 60,
-  },
-  mentalStateBadgeContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-    justifyContent: 'flex-start',
-  },
-  mentalStateIcon: {
-    fontSize: 32,
-  },
-  mentalStateInfo: {
-    flex: 1,
-  },
-  mentalStateLabel: {
-    ...Typography.text.h4,
-    fontWeight: 'bold',
-    marginBottom: 4,
-  },
-  mentalStateDescription: {
-    ...Typography.text.caption,
-    color: Colors.textLight,
-  },
-  expandIcon: {
-    marginLeft: 8,
   },
   dateContainer: {
     flexDirection: 'row',
@@ -431,12 +244,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: 20,
   },
-  instructionText: {
-    ...Typography.text.body,
-    color: Colors.textLight,
-    textAlign: 'center',
-    marginTop: 20,
-  },
   errorContainer: {
     flex: 1,
     alignItems: 'center',
@@ -446,14 +253,6 @@ const styles = StyleSheet.create({
   errorText: {
     ...Typography.text.body,
     color: Colors.textLight,
-  },
-  edgeTouchArea: {
-    position: 'absolute',
-    top: 0,
-    right: 0,
-    width: 30,
-    height: '100%',
-    zIndex: 5,
   },
 });
 
