@@ -84,6 +84,55 @@ eas build --platform android --local
 - Android SDK와 Java JDK 필요
 - 더 복잡하지만 무료
 
+## 웹으로 실행하기 (개발/테스트용)
+
+Expo 프로젝트는 웹 브라우저에서도 실행할 수 있습니다. 모바일 앱 없이 빠르게 UI를 확인할 때 유용합니다.
+
+### 실행 절차
+
+1. **프로젝트 폴더로 이동**
+```bash
+cd touchcare-mobile
+```
+
+2. **웹 의존성 설치 (처음 한 번만)**
+   - `react`와 `react-dom`은 **반드시 동일한 버전**이어야 하므로, 아래 중 하나로 설치:
+
+**방법 A - 권장 (한 번에 설치):**
+```bash
+npm install react-native-web react-dom@19.1.0 --legacy-peer-deps
+```
+(프로젝트의 react 버전이 19.1.0인 경우, react-dom도 19.1.0으로 맞춤)
+
+**방법 B - Expo 권장 명령 사용 후 버전 맞추기:**
+```bash
+npx expo install react-native-web react-dom
+# 만약 react/react-dom 버전 불일치 오류 발생 시:
+npm install react-dom@19.1.0 --save-exact
+```
+
+3. **웹 서버 실행**
+```bash
+npm run web
+```
+
+또는 `expo start` 실행 후 터미널에서 `w` 키 입력
+
+4. **브라우저에서 접속**
+   - 자동으로 브라우저가 열리지 않으면 **http://localhost:8081** 로 접속
+
+### 발생했던 문제점과 해결 방법
+
+| 문제 | 원인 | 해결 방법 |
+|------|------|-----------|
+| `CommandError: It looks like you're trying to use web support but don't have the required dependencies installed` | 웹 지원에 필요한 `react-native-web` 패키지가 미설치 | `npx expo install react-native-web react-dom` 실행 |
+| `Incompatible React versions: The "react" and "react-dom" packages must have the exact same version` | `react`(19.1.0)와 `react-dom`(19.2.4) 버전 불일치 | `npm install react-dom@19.1.0 --save-exact`로 동일 버전 맞추기 |
+| `ERESOLVE unable to resolve dependency tree` | npm 의존성 충돌 (peer dependency) | `--legacy-peer-deps` 옵션 사용 (또는 react-dom 버전 수동 맞춤) |
+
+### 참고사항
+- **블루투스 등 네이티브 기능**은 웹에서 동작하지 않습니다.
+- 개발 중 빠른 확인용으로 활용하고, 실제 디바이스 테스트는 Expo Go 또는 APK 빌드 권장
+
 ## 코드 수정 후 재빌드
 
 ### ✅ 코드를 수정한 경우

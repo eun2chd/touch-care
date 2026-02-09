@@ -63,7 +63,7 @@ export const DeviceDashboardScreen: React.FC<DeviceDashboardScreenProps> = ({ na
   if (!device) {
     return (
       <Screen>
-        <Header onBack={handleBack} />
+        <Header navigation={navigation} />
         <View style={styles.errorContainer}>
           <Text style={styles.errorText}>장치 정보를 찾을 수 없습니다.</Text>
         </View>
